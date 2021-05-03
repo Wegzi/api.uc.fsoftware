@@ -18,9 +18,8 @@ import { AppRouter } from './AppRouter';
 
 import * as models from './models';
 
-import './controllers/Index';
-import './controllers/Auth';
-import './controllers/Tasks';
+import './controllers/index';
+// import './controllers/Auth';
 
 import { BaseDir } from './utils';
 
@@ -31,8 +30,8 @@ const dbConnection = connectDB();
 
 const app = express();
 
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+// app.set('views', path.join(__dirname, 'views'));
+// app.set('view engine', 'ejs');
 
 app.use(express.static(path.join(__dirname, 'public')));
 

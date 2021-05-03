@@ -1,20 +1,11 @@
 import bcrypt from 'bcrypt';
 import moment from 'moment';
 import mongoose, { Document, Schema, Model } from 'mongoose';
-
-interface UserProps {
-  name: string;
-  email: string;
-  password: string;
-  birthdate: Date;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
+import { UserParams } from '../definitions/interfaces/User';
 /**
  * Interface that represents User mongoose Document
  */
-export interface User extends UserProps, Document {
+export interface User extends UserParams, Document {
   /**
    * Get age (in years) of user
    * @returns {number} age
@@ -50,18 +41,20 @@ const UserSchema = new Schema<User>(
       type: Schema.Types.String,
       required: true
     },
-    birthdate: {
-      type: Schema.Types.Date,
-      required: true
+    birth_date: {
+      type: Schema.Types.Date
     }
   },
   {
-    timestamps: true
+    timestamps: {
+      createdAt: 'created_at',
+      updatedAt: 'updated_at'
+    }
   }
 );
 
 UserSchema.methods.getAge = function (): number {
-  return moment().diff(this.birthdate, 'years');
+  return moment().diff(this.birth_date, 'years');
 };
 
 UserSchema.methods.verifyPassword = function (password: string): boolean {

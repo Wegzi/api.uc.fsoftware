@@ -11,10 +11,8 @@
     "clean": "rm -rf build/ *.log",
     "prebuild": "npm run clean && npm run lint",
     "build": "tsc",
-    "postbuild": "npm run copy-views",
     "eslint": "eslint .eslintrc ./src",
     "lint": "prettier --write src/ --loglevel silent && eslint .eslintrc src/ --fix --quiet",
-    "copy-views": "cp -r src/views build/ && cp -r src/public build/",
     "test": "jest",
     "docs": "rm -rf docs && typedoc --tsconfig tsconfig.json --listInvalidSymbolLinks"
   },

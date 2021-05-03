@@ -2,34 +2,14 @@ import 'reflect-metadata';
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { MetadataKeys, Methods } from '.';
 import { AppRouter } from '../AppRouter';
-import { ControllerDetails, ViewHandler, BodyValidatorProps, BodyValidatorOptions } from '../definitions/Decorators';
-
-/**
- * Ensures next() is called after handler is executed and defines 'name' Metadata property
- * @param handler Express RequestHandler
- */
-function next(handler: ViewHandler) {
-  function nextify(req: Request, res: Response, next: NextFunction): void {
-    (async () => {
-      const inject = await handler(req, res);
-      Object.assign(res.locals, inject);
-    })().then(() => {
-      next();
-    });
-  }
-
-  Reflect.defineMetadata('name', Reflect.getMetadata('name', handler), nextify);
-
-  return nextify;
-}
+import { ControllerDetails, BodyValidatorProps } from '../definitions/Decorators';
 
 /**
  * Simple Request Body validation
  *
  * @param keys properties to be validated
- * @param type Decides output format ('api' | 'view')
  */
-function bodyValidators(keys: BodyValidatorProps[], options?: BodyValidatorOptions): RequestHandler {
+function bodyValidators(keys: BodyValidatorProps[]): RequestHandler {
   return function bodyValidator(req: Request, res: Response, next: NextFunction) {
     if (!req.body) {
       res.status(422).send('Invalid request');
@@ -59,18 +39,8 @@ function bodyValidators(keys: BodyValidatorProps[], options?: BodyValidatorOptio
     }
 
     if (Object.keys(errors).length > 0) {
-      switch (options?.type) {
-        case 'view':
-          res.status(422).render('main', {
-            page: options.failureRedirect,
-            errors
-          });
-          return;
-        case 'api':
-        default:
-          res.status(422).send({ errors });
-          return;
-      }
+      res.status(422).send({ errors });
+      return;
     }
 
     next();
@@ -88,7 +58,7 @@ export function controller(routePrefix: string, details: ControllerDetails = {})
   return function (target: Function): void {
     const router = AppRouter.getInstance();
 
-    const { name, description: controllerDescription } = details;
+    const { name, description: controllerDescription, middlewares: controllerMiddlewares = [] } = details;
 
     AppRouter.addController({
       path: routePrefix,
@@ -98,27 +68,20 @@ export function controller(routePrefix: string, details: ControllerDetails = {})
     });
 
     for (const key in target.prototype) {
-      const routeHandler: RequestHandler | ViewHandler = target.prototype[key];
+      const routeHandler: RequestHandler = target.prototype[key];
       const path = Reflect.getMetadata(MetadataKeys.path, target.prototype, key);
       const method: Methods = Reflect.getMetadata(MetadataKeys.method, target.prototype, key);
       const middlewares = Reflect.getMetadata(MetadataKeys.middleware, target.prototype, key) || [];
-      const { keys: requiredBodyProps, options } =
-        Reflect.getMetadata(MetadataKeys.validator, target.prototype, key) || [];
+      const { keys: requiredBodyProps } = Reflect.getMetadata(MetadataKeys.validator, target.prototype, key) || [];
       const description = Reflect.getMetadata(MetadataKeys.description, target.prototype, key);
-      const render = Reflect.getMetadata(MetadataKeys.render, target.prototype, key);
 
-      const validator = bodyValidators(requiredBodyProps, options);
+      const validator = bodyValidators(requiredBodyProps);
 
       const finalPath = `${routePrefix !== '/' ? routePrefix : ''}${path}`;
 
       Reflect.defineMetadata('name', key, routeHandler);
 
-      let handlers;
-      if (render) {
-        handlers = [...middlewares, validator, next(routeHandler as ViewHandler), render];
-      } else {
-        handlers = [...middlewares, validator, routeHandler];
-      }
+      const handlers = [...controllerMiddlewares, ...middlewares, validator, routeHandler];
 
       if (path) {
         router[method](finalPath, handlers);
@@ -126,7 +89,7 @@ export function controller(routePrefix: string, details: ControllerDetails = {})
         AppRouter.addRoute(routePrefix, {
           method,
           path,
-          description: `${render ? '[View] ' : ''}${description || ''}`,
+          description: description || '',
           handlers: handlers.reduce((names, handler) => {
             const name = Reflect.getMetadata('name', handler) || handler.name;
             return [...names, name];

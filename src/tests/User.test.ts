@@ -28,12 +28,12 @@ describe('User Model', () => {
       name: 'Pedro Padilha',
       email: 'pedropadilhafarroco@gmail.com',
       password: '123',
-      birthdate: new Date(1999, 1, 29)
+      birth_date: new Date(1999, 1, 29)
     };
 
     const validUser = new User({
       ...userData,
-      password: bcrypt.hashSync(userData.password, 10),
+      password: bcrypt.hashSync(userData.password, 10)
     });
 
     const savedUser = await validUser.save();
@@ -45,7 +45,7 @@ describe('User Model', () => {
       expect(user.name).toBe(userData.name);
       expect(user.email).toBe(userData.email);
       expect(bcrypt.compareSync(userData.password, user.password)).toBe(true);
-      expect(user.birthdate.getDate()).toBe(userData.birthdate.getDate());
+      expect(user.birth_date.getDate()).toBe(userData.birth_date.getDate());
     }
   });
 });

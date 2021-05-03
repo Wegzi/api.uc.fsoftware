@@ -1,12 +1,13 @@
-import { Request, Response } from 'express';
+import { Request, RequestHandler, Response } from 'express';
 
 // Controller
-export type ViewHandler = (req: Request, res: Response) => Promise<Injectables>;
+// export type ViewHandler = (req: Request, res: Response) => Promise<Injectables>;
 export type Injectables = { [key: string]: any };
 
 export interface ControllerDetails {
   name?: string;
   description?: string;
+  middlewares?: RequestHandler[];
 }
 
 // Body Validator
@@ -18,7 +19,7 @@ export interface BodyValidator {
 }
 
 export interface BodyValidatorOptions {
-  type: 'api' | 'view';
+  type: 'api';
   failureRedirect: string;
 }
 
