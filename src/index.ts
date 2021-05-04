@@ -44,7 +44,6 @@ app.use(flash({ sessionKeyName: 'flashMessage', useCookieSession: true }));
 
 app.use(passport.initialize());
 app.use(passport.session());
-
 app.use(AppRouter.getInstance());
 
 app.use((req, res, next) => {

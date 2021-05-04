@@ -16,6 +16,7 @@ export class Users {
   @description('Fetch all users')
   async index(req: Request, res: Response): Promise<void> {
     const users = await UserModel.find({});
+    // SELECT * FROM users
     res.send(users);
   }
   @post('/')
@@ -66,7 +67,7 @@ export class Users {
 
     const user_id = params?.user_id;
     if (!user_id) return;
-    const user = await UserModel.deleteOne({ _id: ObjectId.createFromHexString(user_id) });
+    await UserModel.deleteOne({ _id: ObjectId.createFromHexString(user_id) });
 
     res.status(201).send('ok');
   }

@@ -5,27 +5,12 @@ import { UserParams } from '../definitions/interfaces/User';
 /**
  * Interface that represents User mongoose Document
  */
-export interface User extends UserParams, Document {
-  /**
-   * Get age (in years) of user
-   * @returns {number} age
-   */
-  getAge(): number;
-
-  /**
-   * Compare given password to registered (encrypted) password
-   * @param {string} password
-   * @returns {boolean} true if password matches, false if not
-   */
-  verifyPassword(password: string): boolean;
-}
+export interface User extends UserParams, Document {}
 
 /**
  * Interface that represents User mongoose Model
  */
-export interface IUserModel extends Model<User> {
-  findByEmail(email: string): Promise<User | null>;
-}
+export interface IUserModel extends Model<User> {}
 
 const UserSchema = new Schema<User>(
   {
@@ -52,19 +37,6 @@ const UserSchema = new Schema<User>(
     }
   }
 );
-
-UserSchema.methods.getAge = function (): number {
-  return moment().diff(this.birth_date, 'years');
-};
-
-UserSchema.methods.verifyPassword = function (password: string): boolean {
-  return bcrypt.compareSync(password, this.password);
-};
-
-UserSchema.statics.findByEmail = async function (email: string): Promise<User | null> {
-  const user = await this.findOne({ email });
-  return user;
-};
 
 const UserModel = mongoose.model<User, IUserModel>('User', UserSchema);
 
