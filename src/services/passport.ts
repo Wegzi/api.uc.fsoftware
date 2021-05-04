@@ -21,25 +21,25 @@ passport.deserializeUser(async (id: string, done) => {
   }
 });
 
-passport.use(
-  new LocalStrategy(
-    {
-      usernameField: 'email'
-    },
-    async (email, password, done) => {
-      try {
-        const user = await User.findByEmail(email);
-        if (user && user.verifyPassword(password)) {
-          return done(undefined, user);
-        }
-      } catch (error) {
-        return done(error);
-      }
+// passport.use(
+//   new LocalStrategy(
+//     {
+//       usernameField: 'email'
+//     },
+//     async (email, password, done) => {
+//       try {
+//         const user = await User.findByEmail(email);
+//         if (user && user.verifyPassword(password)) {
+//           return done(undefined, user);
+//         }
+//       } catch (error) {
+//         return done(error);
+//       }
 
-      return done(undefined, false, { message: 'Invalid email or password' });
-    }
-  )
-);
+//       return done(undefined, false, { message: 'Invalid email or password' });
+//     }
+//   )
+// );
 
 passport.use(
   new JWTStrategy(
