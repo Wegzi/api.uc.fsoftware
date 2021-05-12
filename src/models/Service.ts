@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import moment from 'moment';
 import mongoose, { Document, Schema, Model } from 'mongoose';
-import * as User_1 from '../definitions/interfaces/Service';
+import * as Service_1 from '../definitions/interfaces/Service';
 /**
  * Interface that represents Service mongoose Document
  */
