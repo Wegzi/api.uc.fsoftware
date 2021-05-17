@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
 import { ObjectId } from 'mongodb';
-import mongoose from 'mongoose';
-import passport from 'passport';
 import { bodyValidator, controller, del, description, get, post, put } from '../decorators';
 import { UserBody, UserParams } from '../definitions/interfaces/User';
 import { UserModel } from '../models';
@@ -70,5 +68,22 @@ export class Users {
     await UserModel.deleteOne({ _id: ObjectId.createFromHexString(user_id) });
 
     res.status(201).send('ok');
+  }
+  @post('/login')
+  @description('Authenticate user')
+  @bodyValidator([
+    { name: 'email', message: 'Email is required' },
+    { name: 'password', message: 'Password is required' }
+  ])
+  async login(req: Request<null, null, UserBody>, res: Response): Promise<void> {
+    const { body } = req;
+    const { email, password } = body;
+
+    const user = await UserModel.findOne({ email, password }, { password: 0 });
+    if (user) {
+      res.status(200).send(user);
+      return;
+    }
+    res.status(404).send({ error: true, message: 'not found' });
   }
 }

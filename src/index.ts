@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 const { PORT = 3000, SESSION_SECRET = 'keyboard cat', NODE_ENV } = process.env;
 
+import cors from 'cors';
 import path from 'path';
 import morgan from 'morgan';
 import passport from 'passport';
@@ -19,20 +20,17 @@ import { AppRouter } from './AppRouter';
 import * as models from './models';
 
 import './controllers/index';
-// import './controllers/Auth';
 
 import { BaseDir } from './utils';
 
 import './services/passport';
 import { Config } from './Config';
 
-const dbConnection = connectDB();
+connectDB();
 
 const app = express();
 
-// app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'ejs');
-
+app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(morgan('dev'));
