@@ -1,5 +1,3 @@
-import bcrypt from 'bcrypt';
-import moment from 'moment';
 import mongoose, { Document, Schema, Model } from 'mongoose';
 import { UserParams } from '../definitions/interfaces/User';
 /**

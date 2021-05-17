@@ -56,7 +56,7 @@ export class Users {
       { new: true }
     );
 
-    res.status(201).send(user?.toJSON());
+    res.status(200).send(user?.toJSON());
   }
   @del('/:user_id')
   @description('Delete user')
@@ -67,7 +67,7 @@ export class Users {
     if (!user_id) return;
     await UserModel.deleteOne({ _id: ObjectId.createFromHexString(user_id) });
 
-    res.status(201).send('ok');
+    res.status(200).send();
   }
   @post('/login')
   @description('Authenticate user')

@@ -6,55 +6,60 @@ import { bodyValidator, controller, del, description, get, post, put } from '../
 import { ServiceBody, ServiceParams } from '../definitions/interfaces/Service';
 import { ServiceModel } from '../models';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-@controller('/Service', {
+@controller('/services', {
   name: 'Services',
   description: 'Service Controller'
-  // middlewares: [passport.authenticate('token')]
 })
 export class Services {
   @get('/')
   @description('Fetch all services')
   async index(req: Request, res: Response): Promise<void> {
-    const srvices = await ServiceModel.find({});
-    // SELECT * FROM services
+    const services = await ServiceModel.find({});
     res.send(services);
   }
   @post('/')
   @description('Create Service')
   @bodyValidator([
-    { name: 'name', message: 'Name is required' },
-    { name: 'value', message: 'Value is required' },
+    { name: 'title', message: 'Title is required' },
+    { name: 'description', message: 'Description is required' },
+    { name: 'value', message: 'Value is required' }
   ])
   async create(req: Request<null, null, ServiceBody>, res: Response): Promise<void> {
     const { body } = req;
-    const { name, value } = body;
-
-    const service = await ServiceModel.create({
-      name,
-      value,
-    });
-    res.status(201).send({ service });
+    const { title, description, value, owner } = body;
+    try {
+      const service = await ServiceModel.create({
+        title,
+        description,
+        value,
+        owner: ObjectId.createFromHexString(owner)
+      });
+      res.status(201).send(service);
+    } catch (error) {
+      res.status(500).send(error);
+    }
   }
 
   @put('/:service_id')
   @description('Update service')
   @bodyValidator([
-    { name: 'name', message: 'Name is required' },
-    { name: 'value', message: 'Value is required' },
+    { name: 'title', message: 'Title is required' },
+    { name: 'description', message: 'Description is required' },
+    { name: 'value', message: 'Value is required' }
   ])
   async update(req: Request<ServiceParams, unknown, ServiceBody>, res: Response): Promise<void> {
     const { body, params } = req;
 
-    const { name, value } = body;
+    const { title, value, description } = body;
     const service_id = params?.service_id;
     if (!service_id) return;
     const service = await ServiceModel.findOneAndUpdate(
       { _id: ObjectId.createFromHexString(service_id) },
-      { name, value },
+      { title, value, description },
       { new: true }
     );
 
-    res.status(201).send(service?.toJSON());
+    res.status(200).send(service?.toJSON());
   }
   @del('/:service_id')
   @description('Delete service')
@@ -65,6 +70,6 @@ export class Services {
     if (!service_id) return;
     await ServiceModel.deleteOne({ _id: ObjectId.createFromHexString(service_id) });
 
-    res.status(201).send('ok');
+    res.status(200).send();
   }
 }

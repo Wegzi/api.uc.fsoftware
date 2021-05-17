@@ -1,25 +1,26 @@
-import bcrypt from 'bcrypt';
-import moment from 'moment';
 import mongoose, { Document, Schema, Model } from 'mongoose';
-import * as Service_1 from '../definitions/interfaces/Service';
-/**
- * Interface that represents Service mongoose Document
- */
-export interface Service extends Service_1.ServiceParams, Document {}
+import { ServiceParams } from '../definitions/interfaces/Service';
 
-/**
- * Interface that represents Service mongoose Model
- */
+export interface Service extends ServiceParams, Document {}
+
 export interface IServiceModel extends Model<Service> {}
 
 const ServiceSchema = new Schema<Service>(
   {
-    name: {
+    title: {
+      type: Schema.Types.String,
+      required: true
+    },
+    description: {
       type: Schema.Types.String,
       required: true
     },
     value: {
-      type: Schema.Types.Double,
+      type: Schema.Types.Number,
+      required: true
+    },
+    owner: {
+      type: Schema.Types.ObjectId,
       required: true
     }
   },
@@ -31,6 +32,6 @@ const ServiceSchema = new Schema<Service>(
   }
 );
 
-const ServiceModel = mongoose.model<Service, IServiceModel>('User', ServiceSchema);
+const ServiceModel = mongoose.model<Service, IServiceModel>('Service', ServiceSchema);
 
 export { ServiceModel };
