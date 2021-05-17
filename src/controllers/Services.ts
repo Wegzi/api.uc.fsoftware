@@ -17,6 +17,13 @@ export class Services {
     const services = await ServiceModel.find({});
     res.send(services);
   }
+  @get('/:service_id')
+  @description('Find service')
+  async find(req: Request, res: Response): Promise<void> {
+    const { params } = req;
+    const services = await ServiceModel.findById(params?.service_id);
+    res.send(services);
+  }
   @post('/')
   @description('Create Service')
   @bodyValidator([
