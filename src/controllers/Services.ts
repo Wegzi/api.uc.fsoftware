@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
 import { ObjectId } from 'mongodb';
-import mongoose from 'mongoose';
-import passport from 'passport';
 import { bodyValidator, controller, del, description, get, post, put } from '../decorators';
 import { ServiceBody, ServiceParams } from '../definitions/interfaces/Service';
 import { ServiceModel } from '../models';
@@ -17,6 +15,7 @@ export class Services {
     const services = await ServiceModel.find({});
     res.send(services);
   }
+
   @get('/:service_id')
   @description('Find service')
   async find(req: Request, res: Response): Promise<void> {
@@ -24,6 +23,7 @@ export class Services {
     const services = await ServiceModel.findById(params?.service_id);
     res.send(services);
   }
+
   @post('/')
   @description('Create Service')
   @bodyValidator([
@@ -33,13 +33,13 @@ export class Services {
   ])
   async create(req: Request<null, null, ServiceBody>, res: Response): Promise<void> {
     const { body } = req;
-    const { title, description, value, owner } = body;
+    const { title, description, value, owner_id } = body;
     try {
       const service = await ServiceModel.create({
         title,
         description,
         value,
-        owner: ObjectId.createFromHexString(owner)
+        owner_id: ObjectId.createFromHexString(owner_id)
       });
       res.status(201).send(service);
     } catch (error) {
@@ -68,6 +68,7 @@ export class Services {
 
     res.status(200).send(service?.toJSON());
   }
+
   @del('/:service_id')
   @description('Delete service')
   async delete(req: Request<ServiceParams, unknown, null>, res: Response): Promise<void> {

@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import { ObjectId } from 'mongodb';
 import { bodyValidator, controller, del, description, get, post, put } from '../decorators';
+import { Roles } from '../definitions/enums/User';
 import { UserBody, UserParams } from '../definitions/interfaces/User';
-import { UserModel } from '../models';
+import { ServiceModel, UserModel } from '../models';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 @controller('/users', {
   name: 'Users',
@@ -26,12 +27,13 @@ export class Users {
   ])
   async create(req: Request<null, null, UserBody>, res: Response): Promise<void> {
     const { body } = req;
-    const { name, email, password, birth_date } = body;
+    const { name, email, password, birth_date, role } = body;
 
     const user = await UserModel.create({
       name,
       email,
       password,
+      role: role ?? Roles.administrator,
       birth_date: birth_date ? new Date(birth_date) : null
     });
     res.status(201).send({ user });
@@ -85,5 +87,17 @@ export class Users {
       return;
     }
     res.status(404).send({ error: true, message: 'not found' });
+  }
+  @get('/:user_id/services')
+  @description('Find user services')
+  async userServices(req: Request<UserParams, null, null>, res: Response): Promise<void> {
+    try {
+      const { params } = req;
+      const { user_id } = params;
+      const services = await ServiceModel.find({ owner_id: ObjectId.createFromHexString(user_id) });
+      res.send(services);
+    } catch (error) {
+      res.status(500).send(error);
+    }
   }
 }
