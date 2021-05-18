@@ -3,7 +3,7 @@ import { ObjectId } from 'mongodb';
 import { bodyValidator, controller, del, description, get, post, put } from '../decorators';
 import { Roles } from '../definitions/enums/User';
 import { UserBody, UserParams } from '../definitions/interfaces/User';
-import { ServiceModel, UserModel } from '../models';
+import { PurchaseModel, ServiceModel, UserModel } from '../models';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 @controller('/users', {
   name: 'Users',
@@ -36,7 +36,7 @@ export class Users {
       role: role ?? Roles.administrator,
       birth_date: birth_date ? new Date(birth_date) : null
     });
-    res.status(201).send({ user });
+    res.status(201).send(user);
   }
 
   @put('/:user_id')
@@ -95,6 +95,30 @@ export class Users {
       const { params } = req;
       const { user_id } = params;
       const services = await ServiceModel.find({ owner_id: ObjectId.createFromHexString(user_id) });
+      res.send(services);
+    } catch (error) {
+      res.status(500).send(error);
+    }
+  }
+
+  @get('/:user_id/purchases')
+  @description('Find user purchases')
+  async userPurchases(req: Request<UserParams, null, null>, res: Response): Promise<void> {
+    try {
+      const { params } = req;
+      const { user_id } = params;
+      const services = await PurchaseModel.aggregate([
+        { $match: { owner_id: ObjectId.createFromHexString(user_id) } },
+        {
+          $lookup: {
+            from: 'services',
+            localField: 'service_id',
+            foreignField: '_id',
+            as: 'service'
+          }
+        },
+        { $unwind: '$service' }
+      ]);
       res.send(services);
     } catch (error) {
       res.status(500).send(error);
