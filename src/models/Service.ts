@@ -26,6 +26,11 @@ const ServiceSchema = new Schema<Service>(
       type: [String],
       required: false,
       default: []
+    },
+    team: {
+      type: [Schema.Types.ObjectId],
+      required: false,
+      default: []
     }
   },
   {

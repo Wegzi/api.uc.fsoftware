@@ -33,12 +33,14 @@ export class Services {
   ])
   async create(req: Request<null, null, ServiceBody>, res: Response): Promise<void> {
     const { body } = req;
-    const { title, description, value, owner_id } = body;
+    const { title, description, value, owner_id, team, tags } = body;
     try {
       const service = await ServiceModel.create({
         title,
         description,
         value,
+        team,
+        tags,
         owner_id: ObjectId.createFromHexString(owner_id)
       });
       res.status(201).send(service);
@@ -57,12 +59,12 @@ export class Services {
   async update(req: Request<ServiceParams, unknown, ServiceBody>, res: Response): Promise<void> {
     const { body, params } = req;
 
-    const { title, value, description } = body;
+    const { title, value, description, team, tags } = body;
     const service_id = params?.service_id;
     if (!service_id) return;
     const service = await ServiceModel.findOneAndUpdate(
       { _id: ObjectId.createFromHexString(service_id) },
-      { title, value, description },
+      { title, value, description, team, tags },
       { new: true }
     );
 

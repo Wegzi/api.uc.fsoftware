@@ -17,4 +17,5 @@ export interface ServiceBody {
   value: number;
   owner_id: string;
   tags: string[];
+  team: string[];
 }
