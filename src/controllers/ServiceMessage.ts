@@ -1,29 +1,22 @@
 import { Request, Response } from 'express';
 import { bodyValidator, controller, description, post, get } from '../decorators';
 import { ObjectId } from 'mongodb';
-import { ServiceChatBody } from '../definitions/interfaces/ServiceChat';
-import { ServiceChatModel, ServiceModel, UserModel } from '../models';
+import { ServiceMessageBody } from '../definitions/interfaces/ServiceMessage';
+import { ServiceMessageModel, ServiceModel, UserModel } from '../models';
 import { ServiceParams } from '../definitions/interfaces/Service';
 
-@controller('/service/:service_id/chat', {
+@controller('/service/:service_id/message', {
   name: 'Service chat',
-  description: 'Service Chat Controller'
+  description: 'Service Message Controller'
 })
-export class ServiceChat {
+export class ServiceMessage {
   @get('/')
   @description('List service message')
   async index(req: Request<ServiceParams, null, null>, res: Response): Promise<void> {
     const { service_id } = req.params;
-    const purchase = await ServiceChatModel.aggregate([
+    const purchase = await ServiceMessageModel.aggregate([
       { $match: { service_id: ObjectId.createFromHexString(service_id) } },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'owner_id',
-          foreignField: '_id',
-          as: 'user'
-        }
-      },
+      { $lookup: { from: 'users', localField: 'owner_id', foreignField: '_id', as: 'user' } },
       { $unwind: '$user' }
     ]);
     res.status(201).send(purchase);
@@ -31,7 +24,7 @@ export class ServiceChat {
   @post('/')
   @description('Send service message')
   @bodyValidator([{ name: 'owner_id', message: 'owner_id is required' }])
-  async create(req: Request<ServiceParams, null, ServiceChatBody>, res: Response): Promise<void> {
+  async create(req: Request<ServiceParams, null, ServiceMessageBody>, res: Response): Promise<void> {
     const { body, params } = req;
     const { service_id } = params;
     const { owner_id, message, answerer } = body;
@@ -42,7 +35,7 @@ export class ServiceChat {
         res.status(404).send();
         return;
       }
-      const newMessage = await ServiceChatModel.create({
+      const newMessage = await ServiceMessageModel.create({
         message,
         answerer,
         owner_id: ObjectId.createFromHexString(owner_id),

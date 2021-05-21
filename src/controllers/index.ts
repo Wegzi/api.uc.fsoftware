@@ -1,5 +1,6 @@
 export * from './IndexController';
 export * from './Users';
 export * from './Services';
-export * from './ServiceChat';
+export * from './ServiceMessage';
 export * from './Purchase';
+export * from './PurchaseReport';

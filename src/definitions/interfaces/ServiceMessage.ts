@@ -1,9 +1,9 @@
-export interface ServiceChatBody {
+export interface ServiceMessageBody {
   message: string;
   answerer: boolean;
   service_id: string;
   owner_id: string;
 }
-export interface ServiceChatParams {
+export interface ServiceMessageParams {
   service_id: string;
 }

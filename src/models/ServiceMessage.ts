@@ -1,10 +1,10 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
 
-export interface ServiceChat extends Document {}
+export interface ServiceMessage extends Document {}
 
-export interface IServiceChatModel extends Model<ServiceChat> {}
+export interface IServiceMessageModel extends Model<ServiceMessage> {}
 
-const ServiceChatSchema = new Schema<ServiceChat>(
+const ServiceMessageSchema = new Schema<ServiceMessage>(
   {
     message: {
       type: Schema.Types.String,
@@ -31,6 +31,10 @@ const ServiceChatSchema = new Schema<ServiceChat>(
   }
 );
 
-const ServiceChatModel = mongoose.model<ServiceChat, IServiceChatModel>('ServiceChat', ServiceChatSchema);
+const ServiceMessageModel = mongoose.model<ServiceMessage, IServiceMessageModel>(
+  'ServiceMessage',
+  ServiceMessageSchema,
+  'service_messages'
+);
 
-export { ServiceChatModel };
+export { ServiceMessageModel };
