@@ -16,5 +16,7 @@ export interface UserBody {
   email: string;
   password: string;
   birth_date?: Date;
+  phone_number?: string;
+  cpf?: string;
   role?: Roles;
 }

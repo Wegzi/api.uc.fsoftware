@@ -27,6 +27,12 @@ const UserSchema = new Schema<User>(
     birth_date: {
       type: Schema.Types.Date
     },
+    phone_number: {
+      type: Schema.Types.String
+    },
+    cpf: {
+      type: Schema.Types.String
+    },
     role: {
       type: Schema.Types.String,
       required: true

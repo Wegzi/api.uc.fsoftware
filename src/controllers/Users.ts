@@ -4,18 +4,15 @@ import { bodyValidator, controller, del, description, get, post, put } from '../
 import { Roles } from '../definitions/enums/User';
 import { UserBody, UserParams } from '../definitions/interfaces/User';
 import { PurchaseModel, ServiceModel, UserModel } from '../models';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 @controller('/users', {
   name: 'Users',
   description: 'User Controller'
-  // middlewares: [passport.authenticate('token')]
 })
 export class Users {
   @get('/')
   @description('Fetch all users')
   async index(req: Request, res: Response): Promise<void> {
     const users = await UserModel.find({});
-    // SELECT * FROM users
     res.send(users);
   }
   @post('/')
@@ -27,12 +24,14 @@ export class Users {
   ])
   async create(req: Request<null, null, UserBody>, res: Response): Promise<void> {
     const { body } = req;
-    const { name, email, password, birth_date, role } = body;
+    const { name, email, password, cpf, phone_number, birth_date, role } = body;
 
     const user = await UserModel.create({
       name,
       email,
       password,
+      cpf,
+      phone_number,
       role: role ?? Roles.administrator,
       birth_date: birth_date ? new Date(birth_date) : null
     });
@@ -49,12 +48,20 @@ export class Users {
   async update(req: Request<UserParams, unknown, UserBody>, res: Response): Promise<void> {
     const { body, params } = req;
 
-    const { name, email, password, birth_date } = body;
+    const { name, email, password, phone_number, birth_date, cpf, role } = body;
     const user_id = params?.user_id;
     if (!user_id) return;
     const user = await UserModel.findOneAndUpdate(
       { _id: ObjectId.createFromHexString(user_id) },
-      { name, email, password, birth_date },
+      {
+        name,
+        email,
+        password,
+        phone_number,
+        birth_date,
+        cpf,
+        role: role ?? Roles.administrator
+      },
       { new: true }
     );
 
