@@ -4,6 +4,20 @@ import { bodyValidator, controller, del, description, get, post, put } from '../
 import { Roles } from '../definitions/enums/User';
 import { UserBody, UserParams } from '../definitions/interfaces/User';
 import { PurchaseModel, ServiceModel, UserModel } from '../models';
+import Joi from 'joi';
+
+const schema = Joi.object({
+  name: Joi.string().alphanum().min(3).max(30).required(),
+  email: Joi.string()
+    .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
+    .required(),
+  password: Joi.string().alphanum().min(6).max(30).required(),
+  cpf: Joi.number().integer(),
+  phone_number: Joi.number().integer(),
+  birth_date: Joi.date().iso().less('now').required(),
+  role: Joi.string().alphanum().required()
+});
+
 @controller('/users', {
   name: 'Users',
   description: 'User Controller'
@@ -17,25 +31,25 @@ export class Users {
   }
   @post('/')
   @description('Create user')
-  @bodyValidator([
-    { name: 'name', message: 'Name is required' },
-    { name: 'email', message: 'Email is required' },
-    { name: 'password', message: 'Password is required' }
-  ])
   async create(req: Request<null, null, UserBody>, res: Response): Promise<void> {
     const { body } = req;
+    const result = schema.validate({ ...body });
+    console.log(result);
+    if (result.error) {
+      res.status(422).send(result.error.details);
+      return;
+    }
     const { name, email, password, cpf, phone_number, birth_date, role } = body;
-
-    const user = await UserModel.create({
-      name,
-      email,
-      password,
-      cpf,
-      phone_number,
-      role: role ?? Roles.administrator,
-      birth_date: birth_date ? new Date(birth_date) : null
-    });
-    res.status(201).send(user);
+    // const user = await UserModel.create({
+    //   name,
+    //   email,
+    //   password,
+    //   cpf,
+    //   phone_number,
+    //   role: role ?? Roles.administrator,
+    //   birth_date: birth_date ? new Date(birth_date) : null
+    // });
+    res.status(201).send(result);
   }
 
   @put('/:user_id')

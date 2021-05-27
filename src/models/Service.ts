@@ -1,6 +1,7 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
+import { ServiceParams } from '../definitions/interfaces/Service';
 
-export interface Service extends Document {}
+export interface Service extends ServiceParams, Document {}
 
 export interface IServiceModel extends Model<Service> {}
 
@@ -23,7 +24,7 @@ const ServiceSchema = new Schema<Service>(
       required: true
     },
     tags: {
-      type: [String],
+      type: [Schema.Types.String],
       required: false,
       default: []
     },

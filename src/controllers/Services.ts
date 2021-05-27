@@ -16,6 +16,15 @@ export class Services {
     res.send(services);
   }
 
+  @get('/tags')
+  @description('List service tags')
+  async indexTags(req: Request<null, null, null>, res: Response): Promise<void> {
+    const services = await ServiceModel.find({}, 'tags');
+    const tags = services.map(service => service.tags).flat();
+    const uniqTags = Array.from(new Set(tags));
+    res.status(200).send(uniqTags);
+  }
+
   @get('/:service_id')
   @description('Find service')
   async find(req: Request, res: Response): Promise<void> {
