@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { ObjectId } from 'mongodb';
 import { bodyValidator, controller, del, description, get, post, put } from '../decorators';
 import { ServiceBody, ServiceParams } from '../definitions/interfaces/Service';
+import { ServiceValidator } from '../definitions/validators/service';
 import { ServiceModel } from '../models';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 @controller('/services', {
@@ -35,13 +36,13 @@ export class Services {
 
   @post('/')
   @description('Create Service')
-  @bodyValidator([
-    { name: 'title', message: 'Title is required' },
-    { name: 'description', message: 'Description is required' },
-    { name: 'value', message: 'Value is required' }
-  ])
   async create(req: Request<null, null, ServiceBody>, res: Response): Promise<void> {
     const { body } = req;
+    const result = ServiceValidator.validate({ ...body });
+    if (result.error) {
+      res.status(422).send(result.error.details);
+      return;
+    }
     const { title, description, value, owner_id, team, tags } = body;
     try {
       const service = await ServiceModel.create({
@@ -60,14 +61,13 @@ export class Services {
 
   @put('/:service_id')
   @description('Update service')
-  @bodyValidator([
-    { name: 'title', message: 'Title is required' },
-    { name: 'description', message: 'Description is required' },
-    { name: 'value', message: 'Value is required' }
-  ])
   async update(req: Request<ServiceParams, unknown, ServiceBody>, res: Response): Promise<void> {
     const { body, params } = req;
-
+    const result = ServiceValidator.validate({ ...body });
+    if (result.error) {
+      res.status(422).send(result.error.details);
+      return;
+    }
     const { title, value, description, team, tags } = body;
     const service_id = params?.service_id;
     if (!service_id) return;

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { bodyValidator, controller, description, post } from '../decorators';
-import { PurchaseBody } from '../definitions/interfaces/Purchase';
-import { PurchaseModel } from '../models';
+import { bodyValidator, controller, description, post, get } from '../decorators';
+import { PurchaseParams, PurchaseBody } from '../definitions/interfaces/Purchase';
+import { PurchaseModel, ServiceModel } from '../models';
 import { ObjectId } from 'mongodb';
 
 @controller('/purchase', {
@@ -23,5 +23,26 @@ export class Purchase {
       service_id: ObjectId.createFromHexString(service_id)
     });
     res.status(201).send(purchase);
+  }
+
+  @get('/:user_id/serving')
+  @description('List user serving service')
+  async indexUserServing(req: Request<PurchaseParams, null, null>, res: Response): Promise<void> {
+    const { params } = req;
+    const userId = params.user_id;
+
+    const purchases = await ServiceModel.aggregate([
+      { $match: { team: ObjectId.createFromHexString(userId) } },
+      {
+        $lookup: {
+          from: 'purchases',
+          localField: '_id',
+          foreignField: 'service_id',
+          as: 'purchase'
+        }
+      },
+      { $unwind: '$purchase' }
+    ]);
+    res.status(201).send(purchases);
   }
 }

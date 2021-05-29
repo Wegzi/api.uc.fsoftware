@@ -4,19 +4,7 @@ import { bodyValidator, controller, del, description, get, post, put } from '../
 import { Roles } from '../definitions/enums/User';
 import { UserBody, UserParams } from '../definitions/interfaces/User';
 import { PurchaseModel, ServiceModel, UserModel } from '../models';
-import Joi from 'joi';
-
-const schema = Joi.object({
-  name: Joi.string().alphanum().min(3).max(30).required(),
-  email: Joi.string()
-    .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
-    .required(),
-  password: Joi.string().alphanum().min(6).max(30).required(),
-  cpf: Joi.number().integer(),
-  phone_number: Joi.number().integer(),
-  birth_date: Joi.date().iso().less('now').required(),
-  role: Joi.string().alphanum().required()
-});
+import { LoginValidator, UserValidator } from '../definitions/validators/user';
 
 @controller('/users', {
   name: 'Users',
@@ -33,34 +21,34 @@ export class Users {
   @description('Create user')
   async create(req: Request<null, null, UserBody>, res: Response): Promise<void> {
     const { body } = req;
-    const result = schema.validate({ ...body });
-    console.log(result);
+    const result = UserValidator.validate({ ...body });
     if (result.error) {
       res.status(422).send(result.error.details);
       return;
     }
     const { name, email, password, cpf, phone_number, birth_date, role } = body;
-    // const user = await UserModel.create({
-    //   name,
-    //   email,
-    //   password,
-    //   cpf,
-    //   phone_number,
-    //   role: role ?? Roles.administrator,
-    //   birth_date: birth_date ? new Date(birth_date) : null
-    // });
-    res.status(201).send(result);
+    const user = await UserModel.create({
+      name,
+      email,
+      password,
+      cpf,
+      phone_number,
+      role: role ?? Roles.administrator,
+      birth_date: birth_date ? new Date(birth_date) : null
+    });
+    res.status(201).send(user);
   }
 
   @put('/:user_id')
   @description('Update user')
-  @bodyValidator([
-    { name: 'name', message: 'Name is required' },
-    { name: 'email', message: 'Email is required' },
-    { name: 'password', message: 'Password is required' }
-  ])
   async update(req: Request<UserParams, unknown, UserBody>, res: Response): Promise<void> {
     const { body, params } = req;
+
+    const result = UserValidator.validate({ ...body });
+    if (result.error) {
+      res.status(422).send(result.error.details);
+      return;
+    }
 
     const { name, email, password, phone_number, birth_date, cpf, role } = body;
     const user_id = params?.user_id;
@@ -94,20 +82,22 @@ export class Users {
   }
   @post('/login')
   @description('Authenticate user')
-  @bodyValidator([
-    { name: 'email', message: 'Email is required' },
-    { name: 'password', message: 'Password is required' }
-  ])
   async login(req: Request<null, null, UserBody>, res: Response): Promise<void> {
     const { body } = req;
-    const { email, password } = body;
 
+    const result = LoginValidator.validate({ ...body });
+    if (result.error) {
+      res.status(422).send(result.error.details);
+      return;
+    }
+
+    const { email, password } = body;
     const user = await UserModel.findOne({ email, password }, { password: 0 });
     if (user) {
       res.status(200).send(user);
       return;
     }
-    res.status(404).send({ error: true, message: 'not found' });
+    res.status(404).send([{ message: 'user not found' }]);
   }
   @get('/:user_id/services')
   @description('Find user services')
@@ -115,6 +105,7 @@ export class Users {
     try {
       const { params } = req;
       const { user_id } = params;
+      if (!user_id) return;
       const services = await ServiceModel.find({ owner_id: ObjectId.createFromHexString(user_id) });
       res.send(services);
     } catch (error) {

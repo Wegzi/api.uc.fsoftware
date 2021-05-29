@@ -4,6 +4,7 @@ import { ObjectId } from 'mongodb';
 import { PurchaseReportBody, PurchaseReportParams } from '../definitions/interfaces/PurchaseReport';
 import { PurchaseReportModel } from '../models/PurchaseReport';
 import { PurchaseModel, UserModel } from '../models';
+import { PurchaseReportValidator } from '../definitions/validators/purchase';
 
 @controller('/purchase/:purchase_id/report', {
   name: 'Purchase report',
@@ -27,6 +28,11 @@ export class PurchaseReport {
   async create(req: Request<PurchaseReportParams, null, PurchaseReportBody>, res: Response): Promise<void> {
     const { body, params } = req;
     const { purchase_id } = params;
+    const result = PurchaseReportValidator.validate({ ...body });
+    if (result.error) {
+      res.status(422).send(result.error.details);
+      return;
+    }
     const { owner_id, title, message } = body;
     try {
       const service = await PurchaseModel.findById(purchase_id);

@@ -4,6 +4,7 @@ import { ObjectId } from 'mongodb';
 import { ServiceMessageBody } from '../definitions/interfaces/ServiceMessage';
 import { ServiceMessageModel, ServiceModel, UserModel } from '../models';
 import { ServiceParams } from '../definitions/interfaces/Service';
+import { ServiceMessageValidator } from '../definitions/validators/service';
 
 @controller('/service/:service_id/message', {
   name: 'Service chat',
@@ -35,6 +36,13 @@ export class ServiceMessage {
         res.status(404).send();
         return;
       }
+
+      const result = ServiceMessageValidator.validate({ ...body });
+      if (result.error) {
+        res.status(422).send(result.error.details);
+        return;
+      }
+
       const newMessage = await ServiceMessageModel.create({
         message,
         answerer,
