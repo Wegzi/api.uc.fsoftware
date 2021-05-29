@@ -24,22 +24,20 @@ export class ServiceMessage {
   }
   @post('/')
   @description('Send service message')
-  @bodyValidator([{ name: 'owner_id', message: 'owner_id is required' }])
   async create(req: Request<ServiceParams, null, ServiceMessageBody>, res: Response): Promise<void> {
     const { body, params } = req;
     const { service_id } = params;
     const { owner_id, message, answerer } = body;
     try {
+      const result = ServiceMessageValidator.validate({ ...body });
+      if (result.error) {
+        res.status(422).send(result.error.details);
+        return;
+      }
       const service = await ServiceModel.findById(service_id);
       const user = await UserModel.findById(owner_id);
       if (!service || !user) {
         res.status(404).send();
-        return;
-      }
-
-      const result = ServiceMessageValidator.validate({ ...body });
-      if (result.error) {
-        res.status(422).send(result.error.details);
         return;
       }
 

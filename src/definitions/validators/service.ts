@@ -14,7 +14,8 @@ const schemaService = Joi.object({
 });
 const schemaServiceMessage = Joi.object({
   _id: Joi.string(),
-  message: Joi.string().min(3).max(120).required(),
+  message: Joi.string().min(1).max(2000).required(),
+  answerer: Joi.boolean().required(),
   owner_id: Joi.string().alphanum().required(),
   created_at: Joi.string(),
   updated_at: Joi.string(),
