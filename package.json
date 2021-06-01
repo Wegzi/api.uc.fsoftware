@@ -14,7 +14,14 @@
     "eslint": "eslint .eslintrc ./src",
     "lint": "prettier --write src/ --loglevel silent && eslint .eslintrc src/ --fix --quiet",
     "test": "jest",
-    "docs": "rm -rf docs && typedoc --tsconfig tsconfig.json --listInvalidSymbolLinks"
+    "docs": "rm -rf docs && typedoc --tsconfig tsconfig.json --listInvalidSymbolLinks",
+    "postinstall": "tsc",
+    "watch-node": "nodemon dist/index.js",
+    "watch-ts": "tsc -w",
+    "deploy": "git add . && git commit -m Heroku && git push heroku master"
+  },
+  "engines": {
+    "node": "14.17.0"
   },
   "repository": {
     "type": "git",
