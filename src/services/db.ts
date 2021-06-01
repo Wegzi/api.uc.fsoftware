@@ -6,14 +6,9 @@ import { logger } from './logger';
  * If not specified, defaults to local connection string
  */
 const getDbConnectionString = (): string => {
-  const { DB_HOST, DB_PASSWORD, DB_PORT, DB_USER, DB_DATABASE } = process.env;
-  let connectionString = 'mongodb://localhost:27017/local';
+  const { DB_CONNECTION_STRING } = process.env;
 
-  if (DB_HOST && DB_PASSWORD && DB_PORT && DB_USER && DB_DATABASE) {
-    connectionString = `mongodb://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}`;
-  }
-
-  return connectionString;
+  return DB_CONNECTION_STRING ?? '';
 };
 
 /**
@@ -23,7 +18,7 @@ const connectDB = async (): Promise<Mongoose> => {
   try {
     const connection = await mongoose.connect(getDbConnectionString(), {
       useNewUrlParser: true,
-      useUnifiedTopology: true,
+      useUnifiedTopology: true
     });
 
     logger.info('💾 Connected to Database!');
